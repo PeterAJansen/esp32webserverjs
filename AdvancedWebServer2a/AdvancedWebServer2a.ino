@@ -373,7 +373,7 @@ void loop1 ( void ) {
   server.handleClient();
   //Serial.println("tick");
 
-  loopSensors();
+  //loopSensors();
 }
 
 long lastSensorUpdate = 0;
