@@ -1,0 +1,116 @@
+// Conversion tool: http://tomeko.net/online_tools/cpp_text_escape.php?lang=en
+<html>
+  <head>
+    <title>ESP32 Demo</title>
+    <style>
+      body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }
+    </style>
+  </head>
+  <body>
+    <h1>Hello from ESP8266/ESP32!</h1>
+    <p>Uptime: %02d:%02d:%02d</p>
+    <svg id="svg" width="100" height="100"></svg>
+    <script language="Javascript" type="text/javascript">
+	/*
+	function get_json(url, fn) {
+		http.get(url, function(res) {
+			var body = '';
+			res.on('data', function(chunk) {
+				body += chunk;
+			});
+
+			res.on('end', function() {
+				var response = JSON.parse(body);
+				fn(response);
+			});
+		});
+	};
+	*/
+
+	var getJSON = function(url, callback) {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', url, true);
+		xhr.responseType = 'json';
+		xhr.onload = function() {
+			var status = xhr.status;
+			if (status === 200) {
+				callback(null, xhr.response);
+			} else {
+				callback(status, xhr.response);
+			}
+		};
+		xhr.send();
+	};	
+
+	function drawImage(data) {
+		var pixelSize = 30;
+		var sizeX = data.sizex;
+		var sizeY = data.sizey;	  
+	
+		//var data = JSON.parse( getJSON('/data.json') );
+		var svgns = "http://www.w3.org/2000/svg";
+				
+	
+		/*
+		var svg1 = document.getElementById('svg');		
+		svg1.parentNode.removeChild(svg1);		
+		*/
+		var svg = document.getElementById('svg');
+		while (svg.firstChild) {
+			svg.removeChild(svg.firstChild);
+		}
+	  
+		//var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");'
+		/*
+		var svg = document.createElementNS(svgns, "svg");
+		*/
+		svg.setAttribute('style', 'border: 1px solid black');
+		svg.setAttribute('width', (sizeX * pixelSize).toString());
+		svg.setAttribute('height', (sizeY * pixelSize).toString());
+		svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
+		//document.body.appendChild(svg);	  
+		//*/
+	  
+		var pixelIdx = 0;
+		for (y=0; y<sizeY; y++) {
+			for (x=0; x<sizeX; x++) {			 
+				var value = data.data[pixelIdx];
+				var color = "RGB(" + value * 5 + ", 0, 0)";		
+		
+				var shape = document.createElementNS(svgns, "rect");
+				shape.setAttributeNS(null, "x", x * pixelSize);
+				shape.setAttributeNS(null, "y", y * pixelSize);
+				shape.setAttributeNS(null, "width",  pixelSize);
+				shape.setAttributeNS(null, "height",  pixelSize);
+				shape.setAttributeNS(null, "fill", color);
+				svg.appendChild(shape);
+			
+				pixelIdx += 1;
+			}
+		}
+	}
+	
+	
+    function updateImage() {
+		setTimeout("updateImage()", 1000);
+	
+		getJSON('/data.json', function(status, json) {		
+			if (status == null) {
+				console.log(json);
+				//var jsonParsed = JSON.parse(json);				
+				//console.log(jsonParsed);
+
+				drawImage(json);
+			} else {
+				console.log(status);
+			}
+			// the JSON data is here
+			//drawImage(json);
+		});
+	
+	}
+	
+    updateImage();
+    </script>
+  </body>
+</html>
